@@ -50,9 +50,14 @@ async function run() {
       res.send(result);
     });
 
+    // bookings some data
     app.get("/bookings", async (req, res) => {
-      const cursor = bookingsCollection.find();
-      const result = await cursor.toArray(cursor);
+      let query = {};
+      console.log(req.query?.email);
+      if (req.query?.email) {
+        query = { email: req.query.email };
+      }
+      const result = await bookingsCollection.find(query).toArray();
       res.send(result);
     });
 
