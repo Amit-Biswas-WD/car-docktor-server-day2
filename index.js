@@ -37,7 +37,7 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const options = {
         // Include only the `title` and `imdb` fields in the returned document
-        projection: { title: 1, price: 1, service_id: 1 },
+        projection: { title: 1, price: 1, service_id: 1, img: 1 },
       };
       const result = await servicesCollection.findOne(query, options);
       res.send(result);
@@ -53,11 +53,19 @@ async function run() {
     // bookings some data
     app.get("/bookings", async (req, res) => {
       let query = {};
-      console.log(req.query?.email);
-      if (req.query?.email) {
+      console.log(req.query.email);
+      if (req.query.email) {
         query = { email: req.query.email };
       }
       const result = await bookingsCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // delete bookings data
+    app.delete("/bookings/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await bookingsCollection.deleteOne(query);
       res.send(result);
     });
 
