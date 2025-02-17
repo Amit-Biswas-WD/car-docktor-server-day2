@@ -28,6 +28,26 @@ const logger = async (req, res, next) => {
   next();
 };
 
+// verifyToken
+const verifyToken = async (req, res, next) => {
+  const token = req.cookies?.token;
+  console.log("Value of token in middleWare", token);
+  if (!token) {
+    return res.status(401).send({ message: "not authorized" });
+  }
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    // err
+    if (err) {
+      console.log(err);
+      return res.status(401).send({ message: "not authorized" });
+    }
+    // if token is valid then it would be decoded
+    console.log("value in the token", decoded);
+    req.user = decoded;
+    next();
+  });
+};
+
 async function run() {
   try {
     await client.connect();
@@ -40,7 +60,7 @@ async function run() {
       console.log(user);
 
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: "2h",
+        expiresIn: "1h",
       });
       res
         .cookie("token", token, {
@@ -75,9 +95,13 @@ async function run() {
     });
 
     // bookings some data
-    app.get("/bookings", logger, async (req, res) => {
+    app.get("/bookings", logger, verifyToken, async (req, res) => {
       console.log(req.query.email);
-      console.log("Tik tuk token", req.cookies.token);
+      // console.log("Tik tuk token", req.cookies.token);
+      console.log("user in the valid token", req.user);
+      if (req.query.email !== req.user.email) {
+        return res.status(401).send({ message: "forbidden access" });
+      }
       let query = {};
       if (req.query.email) {
         query = { email: req.query.email };
