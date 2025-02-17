@@ -22,6 +22,12 @@ const client = new MongoClient(uri, {
   },
 });
 
+// middleWare create
+const logger = async (req, res, next) => {
+  console.log("called:", req.host, req.originalUrl);
+  next();
+};
+
 async function run() {
   try {
     await client.connect();
@@ -29,7 +35,7 @@ async function run() {
     const servicesCollection = client.db("CarDoctor").collection("services");
     const bookingsCollection = client.db("CarDoctor").collection("bookings");
 
-    app.post("/jwt", async (req, res) => {
+    app.post("/jwt", logger, async (req, res) => {
       const user = req.body;
       console.log(user);
 
@@ -44,13 +50,13 @@ async function run() {
         .send(token);
     });
 
-    app.get("/services", async (req, res) => {
+    app.get("/services", logger, async (req, res) => {
       const cursor = servicesCollection.find();
       const result = await cursor.toArray();
       res.send(result);
     });
 
-    app.get("/services/:id", async (req, res) => {
+    app.get("/services/:id", logger, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const options = {
@@ -61,7 +67,7 @@ async function run() {
       res.send(result);
     });
 
-    app.post("/bookings", async (req, res) => {
+    app.post("/bookings", logger, async (req, res) => {
       const booking = req.body;
       console.log(booking);
       const result = await bookingsCollection.insertOne(booking);
@@ -69,7 +75,7 @@ async function run() {
     });
 
     // bookings some data
-    app.get("/bookings", async (req, res) => {
+    app.get("/bookings", logger, async (req, res) => {
       console.log(req.query.email);
       console.log("Tik tuk token", req.cookies.token);
       let query = {};
@@ -81,7 +87,7 @@ async function run() {
     });
 
     // delete bookings data
-    app.delete("/bookings/:id", async (req, res) => {
+    app.delete("/bookings/:id", logger, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await bookingsCollection.deleteOne(query);
@@ -89,7 +95,7 @@ async function run() {
     });
 
     // update
-    app.patch("/bookings/:id", async (req, res) => {
+    app.patch("/bookings/:id", logger, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updatedBookings = req.body;
