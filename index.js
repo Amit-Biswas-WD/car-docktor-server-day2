@@ -60,14 +60,20 @@ async function run() {
       console.log(user);
 
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: "1h",
+        expiresIn: "2h",
       });
       res
         .cookie("token", token, {
           httpOnly: true,
-          secure: false,
+          secure: true,
+          sameSite: "none",
         })
-        .send(token);
+        .send({ success: true });
+    });
+
+    app.post("/logOut", async (req, res) => {
+      const user = req.body;
+      res.clearCookie("token", { maxAge: 0 }).send({ success: true });
     });
 
     app.get("/services", logger, async (req, res) => {
