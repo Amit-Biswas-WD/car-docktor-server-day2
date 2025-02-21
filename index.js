@@ -8,7 +8,15 @@ const app = express();
 const port = process.env.POST || 5000;
 
 // middleware
-app.use(cors({ origin: ["http://localhost:5173"], credentials: true }));
+app.use(
+  cors({
+    origin: [
+      "https://car-docktor-client-day2.web.app",
+      "https://car-docktor-client-day2.firebaseapp.com",
+    ],
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 
